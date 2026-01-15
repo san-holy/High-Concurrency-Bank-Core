@@ -16,8 +16,11 @@ public:
 };
 
 class Bank{
-    std::vector<Account> accounts;
+    
 public:
+    std::mutex bankmtx;
+
+    std::vector<Account> accounts;
     Bank(int n,double initial_balance){
         for(int i=0;i<n;i++){
             accounts.push_back(Account(i,initial_balance));
@@ -25,15 +28,25 @@ public:
     }
 
     void transfer(int from,int to,double amount){
-        accounts[from].balance-=amount;
-        accounts[to].balance+=amount;
+
+        {
+            bankmtx.lock();
+            accounts[from].balance-=amount;
+            accounts[to].balance+=amount;
+            bankmtx.unlock();
+        }
+
     }
 
     double getTotalBalance(){
         double sum=0;
+    {
+        bankmtx.lock();
         for(int i=0;i<accounts.size();i++){
             sum+=accounts[i].balance;
         }
+        bankmtx.unlock();
+    }
         return sum;
     }
 };
