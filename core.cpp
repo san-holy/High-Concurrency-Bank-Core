@@ -41,7 +41,7 @@ public:
                 accounts[to]->balance+=amount;
             
                 accounts[to]->accountmtx.unlock();
-            accounts[from]->accountmtx.lock();
+            accounts[from]->accountmtx.unlock();
         }
 
     }
