@@ -68,6 +68,7 @@ void manage(Bank& bank){
         double amount=(double)(rand()%10+1);
 
         bank.transfer(from,to,amount);
+        //当前版本出现了死锁，为什么呢？因为在线程中两个线程可能互相持有对方下一步操作的锁
     }
 }
 int main()
