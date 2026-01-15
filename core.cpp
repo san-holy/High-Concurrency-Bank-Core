@@ -3,6 +3,7 @@
 #include<string>
 #include<thread>
 #include<mutex>
+#include<cstdlib>
 
 class Account{
 private:
@@ -17,9 +18,9 @@ public:
 class Bank{
     std::vector<Account> accounts;
 public:
-    Bank(int n,double *initial_balance){
+    Bank(int n,double initial_balance){
         for(int i=0;i<n;i++){
-            accounts.push_back(Account(i,initial_balance[i]));
+            accounts.push_back(Account(i,initial_balance));
         }
     }
 
@@ -36,15 +37,34 @@ public:
         return sum;
     }
 };
+void manage(Bank& bank){
+    for(int i=0;i<1000;i++){
+        int from,to;
+        do{
+            from=rand()%100;
+            to=rand()%100;
+        }while(from==to);
+        double amount=(double)(rand()%10+1);
+
+        bank.transfer(from,to,amount);
+    }
+}
 int main()
 {
-    double a[100];
-    for(int i=0;i<100;i++){
-        a[i]=1000.0;
-    }
-    Bank bank(100,a);
-    bank.transfer(0,1,100.0);
+    srand(time(0));
 
-    std::cout<<bank.getTotalBalance()<<std::endl;
+    std::thread threads[10];
+    Bank bank(100,1000.0);
+    std::cout<<"initial:"<<bank.getTotalBalance()<<std::endl;
+
+    for(int i=0;i<10;i++){
+        threads[i]=std::thread(manage,std::ref(bank));
+    }
+    
+    for(int i=0;i<10;i++){
+        if(threads[i].joinable()) threads[i].join();
+    }
+
+    std::cout<<"finally:"<<bank.getTotalBalance()<<std::endl;
     return 0;
 }
