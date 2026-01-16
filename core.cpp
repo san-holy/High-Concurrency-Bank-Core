@@ -33,17 +33,18 @@ public:
 
     void transfer(int from,int to,double amount){
 
-        {
-            accounts[from]->accountmtx.lock();
-                accounts[to]->accountmtx.lock();
-                
-                accounts[from]->balance-=amount;
-                accounts[to]->balance+=amount;
-            
-                accounts[to]->accountmtx.unlock();
-            accounts[from]->accountmtx.unlock();
-        }
+        if(from== to) return ;
 
+        std::lock(accounts[from]->accountmtx,accounts[to]->accountmtx);
+
+        std::lock_guard<std::mutex> lock1(accounts[from]->accountmtx,std::adopt_lock);
+        std::lock_guard<std::mutex> lock2(accounts[to]->accountmtx,std::adopt_lock);
+        //这种写法的意思是同时上锁-自动解锁
+        //可以防止死锁
+
+        accounts[from]->balance-=amount;
+        accounts[to]->balance+=amount;
+        //函数结束自然解锁
     }
 
     double getTotalBalance(){
